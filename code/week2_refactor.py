@@ -26,7 +26,7 @@ class SentiRNN():
 
         loader = data_loader(
             data_path = '../data/%s/'%(args.dataset),
-            pad_size = 20, max_vocab=50000)
+            pad_size = 20, max_vocab=100000)
         loader.read_data()
         self.num_class = loader.num_class
         self.vocab = loader.vocab
@@ -61,6 +61,8 @@ class SentiRNN():
         print loader.train['length'][0], loader.train['Y'][0]
         print ' '.join([self.vocab[w] for w in loader.train['X'][1]])
         print loader.train['length'][1],loader.train['Y'][1]
+        print loader.train['Y'][:10]
+        print loader.test['Y'][:10]
         #import pdb; pdb.set_trace()
 
         self.sess = None
@@ -148,7 +150,7 @@ class SentiRNN():
             accuracy += accuracy_
             loss += loss_
 
-            if step % 100 == 0:
+            if step % 1000 == 0:
                 print "[%d/%d] Train Loss %.4f, Accuracy %.4f "%(step, num_batch_train, 1.0*loss/step, 100.0*accuracy/step)
 
             if self.train_iter.epochs > current_epoch:
@@ -206,7 +208,7 @@ if __name__ == '__main__':
     parser.add_argument("--emb_trainable", action='store_true',default=True)
     parser.add_argument("--load_glove", action='store_true',default=True)
     parser.add_argument("--num_max_epochs", default = 20)
-    parser.add_argument("--learning_rate", default=5e-2)
+    parser.add_argument("--learning_rate", default=5e-3)
 
 
     args = parser.parse_args()
