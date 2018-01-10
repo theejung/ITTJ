@@ -2,8 +2,8 @@ import os, sys, argparse
 import numpy as np
 import tensorflow as tf
 
-from utils import confusion_matrix, prec_rec, PaddingDatawithTarget, load_glove
-from data_loader import DataLoader
+from utils import confusion_matrix, prec_rec, PaddingDatawithTarget, load_glove, load_embedding
+from data_loader import MRDataLoader, S140DataLoader
 
 
 
@@ -17,18 +17,24 @@ class SentiRNN():
         self.num_max_epochs = args.num_max_epochs
         self.learning_rate = args.learning_rate
 
-        # TODO data/glove loading....
-
-
         # Load data
-        loader = DataLoader(
-            data_path = '../data/',
-            train_filename = 'train.tsv.zip',
-            pad_size = 10)
+
+        data_loader = None
+        if args.dataset == 'moviereview': data_loader = MRDataLoader
+        elif args.dataset == 'senti140': data_loader = S140DataLoader
+        else: print 'wrong data'; sys.exit(1)
+
+        loader = data_loader(
+            data_path = '../data/%s/'%(args.dataset),
+            pad_size = 20, max_vocab=50000)
         loader.read_data()
         self.num_class = loader.num_class
         self.vocab = loader.vocab
+
+        self.vocab_rev = { w:i for i,w in enumerate(loader.vocab)}
         self.vocab_size = len(loader.vocab)
+
+
 
         # Data iterators
         self.train_iter = PaddingDatawithTarget(loader.train)
@@ -36,13 +42,26 @@ class SentiRNN():
 
         # Load glove
         if self.load_glove:
-            self.emb = load_glove(
-                emb_path = '../data/glove.6B/',
-                emb_filename= 'glove.6B.300d.txt', # 'test.txt', #
+#             self.emb = load_glove(
+                # emb_path = '../data/glove.6B/',
+                # emb_filename= 'glove.6B.300d.txt', # 'test.txt', #
+                # vocab = self.vocab,
+                # emb_size = self.emb_size)
+    #         self.emb_size = self.emb.shape[1]
+            #NOTE I change loading binary file, and different directory
+            self.emb = load_embedding(
+                emb_path = '/data/word2vec/',
+                emb_filename= 'glove.42B.300d.w2v.bin', # 'test.txt', #
                 vocab = self.vocab,
                 emb_size = self.emb_size)
             self.emb_size = self.emb.shape[1]
 
+
+        print ' '.join([self.vocab[w] for w in loader.train['X'][0]])
+        print loader.train['length'][0], loader.train['Y'][0]
+        print ' '.join([self.vocab[w] for w in loader.train['X'][1]])
+        print loader.train['length'][1],loader.train['Y'][1]
+        #import pdb; pdb.set_trace()
 
         self.sess = None
 
@@ -51,7 +70,10 @@ class SentiRNN():
     def build_graph(self):
 
         # create sesion
-        self.sess = tf.Session()
+
+        session_config = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
+        session_config.gpu_options.allow_growth = True
+        self.sess = tf.Session(config = session_config)
 
         # Plaeholders(keep data)
         self.x = tf.placeholder(dtype=tf.int32, shape=[self.batch_size, None])  # [B x L]
@@ -91,6 +113,7 @@ class SentiRNN():
         self.preds_num = tf.cast(tf.argmax(self.preds, 1), tf.int32)
         # loss([B x N], y[B x N])
         self.loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.y, logits=self.logits))
+
         self.train_step = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss)
 
 
@@ -140,7 +163,6 @@ class SentiRNN():
                     # print batch[0], batch[1], batch[2]
                     accuracy_, preds_num_ = self.sess.run([self.accuracy, self.preds_num],
                                                      feed_dict={self.x:batch[0], self.y: batch[1], self.seqlen:batch[2]})
-
                     rnn_conf = confusion_matrix(preds_num_,batch[1],self.num_class)
                     accuracy += accuracy_
                     test_CM += np.array(rnn_conf)
@@ -172,16 +194,19 @@ python week2_refactor.py \
 
 """
 if __name__ == '__main__':
-    
+
     parser = argparse.ArgumentParser()
+
+    parser.add_argument("--dataset", default = 'senti140')
+
     parser.add_argument("--batch_size", default = 128)
-    parser.add_argument("--hidden_size", default = 256)
+    parser.add_argument("--hidden_size", default = 512)
     parser.add_argument("--emb_size", default = 300)
 
     parser.add_argument("--emb_trainable", action='store_true',default=True)
     parser.add_argument("--load_glove", action='store_true',default=True)
-    parser.add_argument("--num_max_epochs", default = 10)
-    parser.add_argument("--learning_rate", default=5e-3)
+    parser.add_argument("--num_max_epochs", default = 20)
+    parser.add_argument("--learning_rate", default=5e-2)
 
 
     args = parser.parse_args()

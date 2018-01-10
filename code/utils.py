@@ -1,6 +1,32 @@
-
+import nltk
 import os,sys
 import numpy as np
+
+def load_embedding(emb_path, emb_filename, vocab, emb_size=False ):
+  import gensim
+  emb_dict = gensim.models.KeyedVectors.load_word2vec_format(emb_path+emb_filename, binary=True)
+  print 'Embedding Loaded..',emb_path+emb_filename
+
+  emb_size_data = len(emb_dict['the'])
+  emb = list()
+  cnt = 0
+  for word in vocab:
+    if word in emb_dict.vocab:
+        emb.append(emb_dict[word])
+        cnt += 1
+    else:
+        emb.append(np.random.uniform(-1,1,emb_size_data))
+  emb = np.array(emb)
+  if emb_size:
+    assert emb_size == emb.shape[1]
+  print "GloVe Loading complete!", emb.shape, cnt, 'exists in glove'
+  return emb
+
+
+
+
+  return glove_embedding
+
 
 def load_glove(emb_path, emb_filename, vocab, emb_size=False):
     emb_dict = dict()
@@ -35,9 +61,9 @@ def lowerr(arr):
     out = list()
     lenn = list()
     for i in arr:
-        out.append(i.lower())
-        lenn.append(len(i))
-
+      tks = i.lower().split() # nltk.word_tokenize(i.lower().decode('utf-8'))
+      out.append(' '.join(tks))
+      lenn.append(len(tks))
     return out, lenn
 
 def confusion_matrix(expected, predicted, n_classes):
