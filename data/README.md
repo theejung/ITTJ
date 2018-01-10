@@ -1,5 +1,6 @@
 ### Sentiment Sentiment140 Dataset
- - http://help.sentiment140.com/for-students
+ - download [here](http://cs.stanford.edu/people/alecmgo/trainingandtestdata.zip)
+ - [description](http://help.sentiment140.com/for-students)
  - The data is a CSV with emoticons removed. Data file format has 6 fields:
     - the polarity of the tweet (0 = negative, 2 = neutral, 4 = positive)
     - the id of the tweet (2087)
