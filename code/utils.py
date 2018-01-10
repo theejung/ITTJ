@@ -2,10 +2,13 @@ import nltk
 import os,sys
 import numpy as np
 
-def load_embedding(emb_path, emb_filename, vocab, emb_size=False ):
+def load_embedding(emb_path, emb_filename, vocab=None, emb_size=False ):
   import gensim
   emb_dict = gensim.models.KeyedVectors.load_word2vec_format(emb_path+emb_filename, binary=True)
   print 'Embedding Loaded..',emb_path+emb_filename
+
+  if vocab is None:
+    return emb_dict
 
   emb_size_data = len(emb_dict['the'])
   emb = list()
@@ -21,11 +24,6 @@ def load_embedding(emb_path, emb_filename, vocab, emb_size=False ):
     assert emb_size == emb.shape[1]
   print "GloVe Loading complete!", emb.shape, cnt, 'exists in glove'
   return emb
-
-
-
-
-  return glove_embedding
 
 
 def load_glove(emb_path, emb_filename, vocab, emb_size=False):

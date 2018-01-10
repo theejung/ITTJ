@@ -7,6 +7,10 @@ import numpy as np
 
 from utils import lowerr
 
+
+
+
+
 class TimeSeriesDataLoader():
 
     def __init__(self, data_path, filename, feature = ['volatil'], ticker="AAPL", start_date="1990-01-01", end_date="2010-12-31", seq_len = 12, step = 1, test_size = 12, normalize = False):
