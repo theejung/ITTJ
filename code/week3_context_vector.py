@@ -51,7 +51,9 @@ class ContextEncoder():
            #  print '\t[%d] lines in file'%(lidx)
       context_emb = np.average(tweet_embs, axis=0)
       print '\t',time, len(tweet_embs), context_emb.shape
-      fout.write('%s\t%s\n'%(time, ' '.join(['%.5f'%(v) for v in context_emb])))
+      if len(tweet_embs) == 0:
+        context_emb = np.zeros(300)
+      fout.write('%s\t%s\n'%(time, ' '.join(['%.5f'%(v) for v in list(context_emb)])))
 
     fout.close()
 
