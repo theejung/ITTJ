@@ -51,6 +51,7 @@ class TimeSerisLSTM():
         self.train_y = loader.train_y
         self.test_x = loader.test_x
         self.test_y = loader.test_y
+        import pdb; pdb.set_trace()
 
    #loader.train_x, loader.train_y.shape, loader.test_x.shape, loader.test_y.shape
 
