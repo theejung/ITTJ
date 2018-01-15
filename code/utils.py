@@ -118,3 +118,16 @@ class PaddingDatawithTarget():
         new_x = np.array(new_x, dtype=np.int32)
 
         return new_x, np.array(res['Y'], dtype=np.int32), np.array(res['length'], dtype=np.int32)
+
+    def next_batch_text(self, n):
+        if self.cursor + n > self.size:
+            self.epochs += 1
+            self.shuffle()
+
+        res = self.df.ix[self.cursor:self.cursor + n - 1]
+        self.cursor += n
+        return str(res['X'].values[0]), str(res['Y'].values[0]), None
+
+
+
+

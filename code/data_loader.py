@@ -97,6 +97,30 @@ class MRDataLoader():
         self.test = []
         self.num_class = -1
 
+
+
+
+    def read_data_text(self, only_test=False):
+
+        # road train data into pandas DataFrame
+        with zipfile.ZipFile(os.path.abspath(self.data_path + self.train_filename)) as z:
+            with z.open(z.namelist()[0]) as f:
+                train = pd.read_csv(f, header=0, delimiter='\t')
+        print 'Load train data done!'
+        train_sentence, train_length = lowerr(train.Phrase)
+        train_y = train.Sentiment
+
+        ## Train vs Test
+        df = pd.DataFrame({'X': train_sentence, 'Y': train_y, 'length': train_length})
+        df = df.sample(frac=1, random_state=63).reset_index(drop=True)
+        test_len = np.floor(len(df) * 0.1)
+        self.test, self.train = df.ix[:test_len - 1], df.ix[test_len:]
+        print self.train['X'].shape, self.train['Y'].shape
+        print self.test['X'].shape, self.test['Y'].shape
+
+
+
+
     def read_data(self):
         # road train data into pandas DataFrame
         with zipfile.ZipFile(os.path.abspath(self.data_path + self.train_filename)) as z:
@@ -159,6 +183,32 @@ class S140DataLoader():
         self.test = []
         self.num_class = -1
 
+
+    def read_data_text(self, only_test=False):
+
+        if not only_test:
+          # road train data into pandas DataFrame
+          with open(os.path.abspath(self.data_path + self.train_filename)) as f:
+              train = pd.read_csv(f, header=None, delimiter=',', usecols=[0,5])
+          print 'Load train data done!'
+          train_sentence, train_length = lowerr(train[5])
+          train_y = train[0]
+          self.train = pd.DataFrame({'X': train_sentence, 'Y': train_y, 'length': train_length})
+          print self.train['X'].shape, self.train['Y'].shape
+
+        # road train data into pandas DataFrame
+        with open(os.path.abspath(self.data_path + self.test_filename)) as f:
+            test = pd.read_csv(f, header=None, delimiter=',', usecols=[0,5])
+        print 'Load test data done!'
+        test_sentence, test_length = lowerr(test[5])
+        test_y = test[0]
+        self.test = pd.DataFrame({'X': test_sentence, 'Y': test_y, 'length': test_length})
+        print self.test['X'].shape, self.test['Y'].shape
+
+
+
+
+
     def read_data(self):
         # road train data into pandas DataFrame
         with open(os.path.abspath(self.data_path + self.train_filename)) as f:
@@ -184,28 +234,16 @@ class S140DataLoader():
         train_sentence, train_length = lowerr(train[5])
         self.create_vocab(train_sentence)
         train_y = train[0]
-
-#         vocab_processor = learn.preprocessing.VocabularyProcessor(max_document_length=self.pad_size, vocabulary=self.vocab_dic)
-        # import pdb; pdb.set_trace()
-        # #vocab_processor.fit(self.vocab_dic)
-        # train_x = list(vocab_processor.fit_transform(train_sentence))
         train_x = processor(train_sentence, self.vocab_dic, self.pad_size)
-
         self.num_class = len(np.unique(train_y))
         print 'Unique y in train', len(np.unique(train_y)),np.unique(train_y)
 
-        #NOTE one-hot vector for Y
         Y_vocab = list(np.unique(train_y))
         y_vecs = []
         for yone in train_y:
-#           yone_vec = np.zeros(len(Y_vocab),dtype=np.int32)
- #          yone_vec[Y_vocab.index(yone)] = 1
           y_vecs.append(Y_vocab.index(yone))
         train_y = y_vecs
-
         self.train = pd.DataFrame({'X': train_x, 'Y': train_y, 'length': train_length})
-
-
 
 
         def filter_neutral(sents,lens,ys):
@@ -226,12 +264,8 @@ class S140DataLoader():
         print 'Unique y in test', len(np.unique(test_y)),np.unique(test_y)
         y_vecs = []
         for yone in test_y:
-#           yone_vec = np.zeros(len(Y_vocab),dtype=np.int32)
-  #         yone_vec[Y_vocab.index(yone)] = 1
           y_vecs.append(Y_vocab.index(yone))
         test_y = y_vecs
-
-#         test_x = list(vocab_processor.transform(test_sentence))
         test_x = processor(test_sentence, self.vocab_dic, self.pad_size)
         self.test = pd.DataFrame({'X': test_x, 'Y': test_y, 'length': test_length})
 
