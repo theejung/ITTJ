@@ -49,7 +49,7 @@ class SentiDict():
         if word in self.senti_dict['negative']:
           score_neg += 1
       score = score_pos - score_neg
-      #print score, label
+      print score, label
       #import pdb; pdb.set_trace()
 
 
@@ -88,7 +88,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--dataset", default = 'moviereview') #'senti140'
+    parser.add_argument("--dataset", default = 'senti140') #'senti140'
     args = parser.parse_args()
 
     model = SentiDict(args)

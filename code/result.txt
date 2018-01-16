@@ -1,0 +1,4 @@
+GOOG	last_price	12.3531
+GOOG	volatil	0.0001
+AAPL	last_price	3.4902
+AAPL	volatil	0.0001

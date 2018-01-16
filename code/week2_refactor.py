@@ -199,7 +199,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--dataset", default = 'senti140')
+    parser.add_argument("--dataset", default = 'senti140') # moviewreview
 
     parser.add_argument("--batch_size", default = 128)
     parser.add_argument("--hidden_size", default = 512)

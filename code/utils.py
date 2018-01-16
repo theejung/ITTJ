@@ -2,6 +2,14 @@ import nltk
 import os,sys
 import numpy as np
 
+from sklearn.metrics import mean_squared_error
+from math import sqrt
+
+def rmse(y,y_pred):
+	return sqrt(mean_squared_error(y, y_pred))
+
+
+
 def load_embedding(emb_path, emb_filename, vocab=None, emb_size=False ):
   import gensim
   emb_dict = gensim.models.KeyedVectors.load_word2vec_format(emb_path+emb_filename, binary=True)
