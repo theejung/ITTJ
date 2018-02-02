@@ -10,7 +10,7 @@ from utils import lowerr
 
 class ContextDataLoader():
 
-    def __init__(self, data_path, ticker="AAPL", start_date="1990-01-01", end_date="2010-12-31", seq_len = 12, step = 1, test_size = 12, normalize = False):
+    def __init__(self, data_path, ticker="AAPL", start_date="1990-01-01", end_date="2010-12-31", seq_len = 12, step = 1, normalize = False):
         self.data_path = data_path
         self.ticker = ticker
         self.start_date = start_date
@@ -18,7 +18,7 @@ class ContextDataLoader():
         self.seq_len = seq_len
         self.step = step
         self.normalize = normalize
-        self.test_size = test_size
+        #self.test_size = test_size
 
     def load_data(self):
         vecs = []
@@ -38,7 +38,7 @@ class ContextDataLoader():
 
         # filter my first day of each month
         df.index = df.index.astype('str')
-        df = df[df.index.str.contains('-[0-9]*-01')]
+        df = df[df.index.str.contains('-[0-9]*')]
         print(len(df))
 
         return df
@@ -80,21 +80,21 @@ class ContextDataLoader():
         # import pdb; pdb.set_trace()
 
 
-    def normalize_window(self, arr):
-        array_change = []
-
-        for list in arr:
-            array_change.append([(float(p)/list[0]) - 1 for p in list])
-
-        arr = array_change
-
+#    def normalize_window(self, arr):
+#        array_change = []
+#
+#        for list in arr:
+#            array_change.append([(float(p)/list[0]) - 1 for p in list])
+#
+#        arr = array_change
+#
 
 
 
 
 class TimeSeriesDataLoader():
 
-    def __init__(self, data_path, filename, feature = ['volatil'], ticker="AAPL", start_date="1990-01-01", end_date="2010-12-31", seq_len = 12, step = 1, test_size = 12, normalize = False, is_batch=True):
+    def __init__(self, data_path, filename, feature = ['volatil'], ticker="AAPL", start_date="1990-01-01", end_date="2010-12-31", seq_len = 12, step = 1, normalize = False, is_batch=True):
         self.data_path = data_path
         self.filename = filename
         self.feature = feature
@@ -104,8 +104,8 @@ class TimeSeriesDataLoader():
         self.seq_len = seq_len
         self.step = step
         self.normalize = normalize
-        self.test_size = test_size
-        self.is_batch = is_batch
+        #self.test_size = test_size
+        #self.is_batch = is_batch
 
     def load_data(self):
         # 1. Load all CSV file to pandas Dataframe, indexing with timestamp
@@ -120,55 +120,54 @@ class TimeSeriesDataLoader():
         df = df[self.start_date:self.end_date]
         df = df[self.feature]
 
-        if not self.is_batch:
-          return df
+        return df
 
-        train_size = len(df) - self.test_size
-        train, test = df[:train_size], df[train_size:]
-
-        # 3. Make a 3-dim array [N x W x F] N = num of train, W = seq length, F = num of features
-        df_array = np.array(df[self.feature]).transpose()
-        sequence_length = self.seq_len + self.step
-        print self.seq_len, self.step
-
-        for f in df_array: #what if we have several features?
-            result = list()
-            #print len(f) - sequence_length
-            for i in xrange(len(f) - sequence_length+1):
-                #print f[i:i+sequence_length]
-                result.append(f[i:i+sequence_length])
-
-            result = np.array(result)
-            print len(result)
-
-            train_size = len(result) -self.test_size
-            train, test = result[:train_size], result[train_size:]
-            self.train_x, self.train_y = train[:,:-1*self.step], train[:,-1*self.step:]
-            self.test_x, self.test_y = test[:,:-1*self.step], test[:,-1*self.step:]
-
-            print len(self.train_x), len(self.train_y), len(self.test_x), len(self.test_y)
-            print self.train_x[0], self.train_y[0], self.train_x[1], self.train_y[1]
-
-            # 4. Normalize window if normalize_window = True
-
-            if self.normalize:
-                self.normalize_window(self.train_x)
-                self.normalize_window(self.test_x)
-
-            self.train_x = np.reshape(self.train_x, (self.train_x.shape[0], self.train_x.shape[1],len(self.feature)))
-            self.test_x = np.reshape(self.test_x, (self.test_x.shape[0], self.test_x.shape[1], len(self.feature)))
-
-
-
-
-    def normalize_window(self, arr):
-        array_change = []
-
-        for list in arr:
-            array_change.append([(float(p)/list[0]) - 1 for p in list])
-
-        arr = array_change
-
+#        train_size = len(df) - self.test_size
+#        train, test = df[:train_size], df[train_size:]
+#
+#        # 3. Make a 3-dim array [N x W x F] N = num of train, W = seq length, F = num of features
+#        df_array = np.array(df[self.feature]).transpose()
+#        sequence_length = self.seq_len + self.step
+#        print self.seq_len, self.step
+#
+#        for f in df_array: #what if we have several features?
+#            result = list()
+#            #print len(f) - sequence_length
+#            for i in xrange(len(f) - sequence_length+1):
+#                #print f[i:i+sequence_length]
+#                result.append(f[i:i+sequence_length])
+#
+#            result = np.array(result)
+#            print len(result)
+#
+#            train_size = len(result) -self.test_size
+#            train, test = result[:train_size], result[train_size:]
+#            self.train_x, self.train_y = train[:,:-1*self.step], train[:,-1*self.step:]
+#            self.test_x, self.test_y = test[:,:-1*self.step], test[:,-1*self.step:]
+#
+#            print len(self.train_x), len(self.train_y), len(self.test_x), len(self.test_y)
+#            print self.train_x[0], self.train_y[0], self.train_x[1], self.train_y[1]
+#
+#            # 4. Normalize window if normalize_window = True
+#
+#            if self.normalize:
+#                self.normalize_window(self.train_x)
+#                self.normalize_window(self.test_x)
+#
+#            self.train_x = np.reshape(self.train_x, (self.train_x.shape[0], self.train_x.shape[1],len(self.feature)))
+#            self.test_x = np.reshape(self.test_x, (self.test_x.shape[0], self.test_x.shape[1], len(self.feature)))
+#
+#
+#
+#
+#    def normalize_window(self, arr):
+#        array_change = []
+#
+#        for list in arr:
+#            array_change.append([(float(p)/list[0]) - 1 for p in list])
+#
+#        arr = array_change
+#
 
 
 
