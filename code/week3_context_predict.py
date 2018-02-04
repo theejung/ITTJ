@@ -37,7 +37,7 @@ class TimeSerisLSTM():
         self.companies = args.companies
         self.timeseries_type = args.timeseries_type
 
-        self.norm = True #TODO
+        self.norm = args.norm
 
         # load context series
         cont_loader = ContextDataLoader(
@@ -47,8 +47,7 @@ class TimeSerisLSTM():
             end_date = self.end_date,
             seq_len = self.window_size,
             step = self.step_size,
-            normalize = False,
-            test_size = self.test_size)
+            normalize = self.norm)
         context = cont_loader.load_data()
 
         # load time series
@@ -61,9 +60,7 @@ class TimeSerisLSTM():
             end_date = self.end_date,
             seq_len = self.window_size,
             step = self.step_size,
-            normalize = False,
-            test_size = self.test_size,
-            is_batch = False)
+            normalize = self.norm)
 
         series = ts_loader.load_data()
 
@@ -193,6 +190,8 @@ if __name__ == '__main__':
 
     parser.add_argument("--epoch", default=200)
     parser.add_argument("--batch_size", default= 5)
+
+    parser.add_argument("--norm", action='store_true', default=False)
 
     #Hyper-parameter for data preparation
     parser.add_argument("--test_size", default=12)
