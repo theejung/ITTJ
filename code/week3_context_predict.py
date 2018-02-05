@@ -53,7 +53,7 @@ class TimeSerisLSTM():
         # load time series
         ts_loader = TimeSeriesDataLoader(
             data_path = '../data',
-            filename = 'stock_vol_all.csv',
+            filename = 'daily_price_5comp.csv', #'stock_vol_all.csv',
             feature = [self.timeseries_type],
             ticker = self.companies,
             start_date = self.start_date,
@@ -103,8 +103,8 @@ class TimeSerisLSTM():
 
         test_x, test_y = [], []
         for idx in range(len(test) - self.window_size - self.step_size):
-          t_x = train[idx: idx + self.window_size]
-          t_y = train[idx + self.window_size : idx + self.window_size + self.step_size]
+          t_x = test[idx: idx + self.window_size]
+          t_y = test[idx + self.window_size : idx + self.window_size + self.step_size]
           test_x.append(t_x.as_matrix())
           test_y.append(t_y.as_matrix())
 
@@ -185,24 +185,24 @@ if __name__ == '__main__':
     parser.add_argument("--layers", default=[200,200])
     parser.add_argument("--dropout",action='store_true',default=True)
     parser.add_argument("--dropout_rt", default = 0.2)
-    parser.add_argument("--learning_rate", default = 0.001) #0.5 for price 0.001 for volatil
+    parser.add_argument("--learning_rate", default = 0.5) #0.5 for price 0.001 for volatil
 
 
-    parser.add_argument("--epoch", default=200)
+    parser.add_argument("--epoch", default=300)
     parser.add_argument("--batch_size", default= 5)
 
     parser.add_argument("--norm", action='store_true', default=False)
 
     #Hyper-parameter for data preparation
-    parser.add_argument("--test_size", default=12)
+    parser.add_argument("--test_size", default=252)
     parser.add_argument("--step_size", default=1)
-    parser.add_argument("--window_size", default=6)
+    parser.add_argument("--window_size", default=30)
 
 
     parser.add_argument("--start_date", default="2009-01-01")
     parser.add_argument("--end_date", default="2013-12-31")
 
-    parser.add_argument("--companies", default="AAPL")
+    parser.add_argument("--companies", default="GOOG")
     # ['AAPL', 'AMZN', 'MSFT', 'FB', 'GOOG']
     parser.add_argument("--timeseries_type", default="last_price")
     # last_price volatil
