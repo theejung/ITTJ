@@ -53,7 +53,7 @@ class TimeSerisLSTM():
         # load time series
         ts_loader = TimeSeriesDataLoader(
             data_path = '../data',
-            filename = 'stock_vol_all.csv',
+            filename = 'daily_price_5comp.csv',#'stock_vol_all.csv',
             feature = [self.timeseries_type],
             ticker = self.companies,
             start_date = self.start_date,
@@ -134,8 +134,8 @@ class TimeSerisLSTM():
         #self.model.add(Activation("linear"))
 
         start = time.time()
-        self.model.compile(loss="mse", optimizer="rmsprop",
-            lr=self.learning_rate)
+        self.model.compile(loss="mse", optimizer="rmsprop")
+            #,lr=self.learning_rate)
         print("Compilation Time: ", time.time() - start)
 
 
@@ -180,23 +180,30 @@ class TimeSerisLSTM():
 #TODO (1) model save/restore, (2) train/test loading structure efficiently, (3) RMSE calculation (4) visualziation
 #TODO (5) add stock price, (6) Apple -> 10 companies, more periods, (7) Task - 3. (random word vector).
 
+
+import tensorflow as tf
+from keras.backend.tensorflow_backend import set_session
+tf_config = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
+tf_config.gpu_options.allow_growth = True
+set_session(tf.Session(config=tf_config))
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--layers", default=[200,200])
     parser.add_argument("--dropout",action='store_true',default=True)
     parser.add_argument("--dropout_rt", default = 0.2)
-    parser.add_argument("--learning_rate", default = 0.001) #0.5 for price 0.001 for volatil
+    parser.add_argument("--learning_rate", default = 0.5) #0.5 for price 0.001 for volatil
 
 
     parser.add_argument("--epoch", default=200)
-    parser.add_argument("--batch_size", default= 5)
+    parser.add_argument("--batch_size", default= 32) #5
 
     parser.add_argument("--norm", action='store_true', default=False)
 
     #Hyper-parameter for data preparation
-    parser.add_argument("--test_size", default=12)
+    parser.add_argument("--test_size", default=252)
     parser.add_argument("--step_size", default=1)
-    parser.add_argument("--window_size", default=6)
+    parser.add_argument("--window_size", default=30)
 
 
     parser.add_argument("--start_date", default="2009-01-01")
