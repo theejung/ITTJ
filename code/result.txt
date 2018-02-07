@@ -1,8 +1,3 @@
-GOOG	last_price	12.3531
-GOOG	volatil	0.0001
-AAPL	last_price	3.4902
-AAPL	volatil	0.0001
-<<<<<<< HEAD
 GOOG	last_price	11.2882
 GOOG	volatil	0.0028
 AAPL	last_price	0.7648
@@ -11,9 +6,3 @@ AMZN	last_price	2.9276
 AMZN	volatil	0.0055
 MSFT	last_price	0.3897
 MSFT	volatil	0.0032
-=======
-AMZN	last_price	21.3319
-AMZN	volatil	0.0013
-MSFT	last_price	1.4793
-MSFT	volatil	0.0002
->>>>>>> 7c720d7cfd826959b5f146c6520b0c37410076b3
