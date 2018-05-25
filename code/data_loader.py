@@ -115,7 +115,6 @@ class TimeSeriesDataLoader():
         df.index = pd.to_datetime(df['ym'])
 
         # 2. Left df only specific company and period
-
         df = df.loc[df['ticker'] == self.ticker]
         df = df[self.start_date:self.end_date]
         df = df[self.feature]
@@ -249,8 +248,6 @@ class MRDataLoader():
         self.vocab = [k for k,c in freq_list]
 
         print "Create Vocab Done!", len(self.vocab)
-
-
 
 
 class S140DataLoader():

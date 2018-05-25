@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import statsmodels
 import statsmodels.api as sm
+import itertools
 import statsmodels.formula.api as smf
 from datetime import datetime as dt
 from datetime import timedelta
@@ -51,8 +52,8 @@ class TSModel:
             self.__fit_forecast_AR()
         elif self.method == 'ma':
             self.__fit_forecast_MA()
-        elif self.method == 'arma':
-            self.__fit_forecast_ARMA()
+        elif self.method == 'arima':
+            self.__fit_forecast_ARIMA()
         elif self.method == 'var':
             self.__fit_forecast_VAR()
         else:
@@ -65,6 +66,60 @@ class TSModel:
             raise Exception("Fail to get fitted values")
         if self.result['forecast'] is None:
             raise Exception("Fail to get forecasted values")
+
+    def __fit_forecast_ARIMA(self):
+        if self.verbose:
+            print "=== fit and forecast ARIMA is not implemented yet=== "
+
+
+        #1. Find best pdq combination
+
+        p = d = q = range(0,3)
+
+        pdq = list(itertools.product(p, d, q))
+        print pdq
+        aic = float('inf')
+        best_pdq = None
+        for param in pdq:
+            try:
+                print "START BEST_PARAM(ARIMA): {}".format(param)
+                mod = sm.tsa.ARIMA(endog=self.endog, order = param)
+                results = mod.fit()
+                if aic > results.aic:
+                    aic = results.aic
+                    best_pdq = param
+            except:
+                continue
+
+        ## fit ##
+        arima_model = sm.tsa.ARIMA(endog=self.endog, order = best_pdq)
+        arima_fit = arima_model.fit()
+
+        ## forecast ##
+        start = len(self.endog) - best_pdq[0]
+        end = len(self.endog) - 1 + self.steps
+
+        arima_forecast = arima_fit.predict(start,end)
+        #DON'T FORGET THAT ARIMA's RESULT WITH FORECAST FUNCTION CAN BE DIFFERENT!
+        #print best_pdq, start, end
+        #print "PREDICT ARIMA:{}".format(arima_fit.predict(start,end))
+        #print "FORECAST ARIMA:{}".format(arima_fit.forecast(5)[0])
+        ## assign results ##
+        self.result['fit_results'] = arima_fit
+        self.result['params'] = best_pdq
+
+        if self.isnpa:
+            self.result['fit'] = np.append(self.endog[:best_pdq[0]], arima_fit.fittedvalues)
+            self.result['forecast'] = arima_forecast[-self.steps:]
+        else:
+            self.result['fit'] = np.append(self.endog.values[:best_pdq[0]], arima_fit.fittedvalues.values)
+            self.result['forecast'] = arima_forecast.values[-self.steps:]
+
+        if self.verbose:
+            print "model parameters(p,d,q):\n", best_pdq
+            print "t-values associated with 'params':\n", arima_fit.tvalues
+            print "fitted values:\n", arima_fit.fittedvalues
+            print "residuals:\n", arima_fit.resid
 
 
     def __fit_forecast_AR(self):
@@ -85,15 +140,14 @@ class TSModel:
         #end = self.endog.index[-1] + self.steps * self.timedelta
         start = len(self.endog) - ar_fit.k_ar
         end = len(self.endog) - 1 + self.steps
-
         #print len(self.endog), ar_fit.k_ar, start, end, self.steps
         #print self.endog.shape
         ar_forecast = ar_fit.predict(start, end)
-        #ar_forecast = ar_fit.predict(len(self.endog),len(self.endog) + self.steps)
 
         ## assign results ##
         self.result['fit_results'] = ar_fit
         self.result['params'] = ar_fit.params
+
         if self.isnpa:
             self.result['fit'] = np.append(self.endog[:ar_fit.k_ar], ar_fit.fittedvalues)
             self.result['forecast'] = ar_forecast[-self.steps:]
@@ -166,35 +220,23 @@ class TSModel:
         self.result['forecast'] = None
 
 
-    def __fit_forecst_ARMA(self):
-        if self.verbose:
-            print "=== fit and forecast ARMA is not implemented yet=== "
-        self.result['fit_results'] = None
-        self.result['params'] = None
-        self.result['fit'] = None
-        self.result['forecast'] = None
-
-
 if __name__ == "__main__":
 
-    myTSModel = TSModel(isnpa=True, verbose=False)
-
+    myTSModel = TSModel(isnpa=True, verbose=True)
     print ('## test AR with trivious data ##')
     myTSModel.endog = np.array([0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192])
     myTSModel.fit_forecast()
     print ('1-step ahead forecasted value: {0}'.format(myTSModel.result['forecast']))
 
-    print ('## test VAR with trivious data ##')
-    myTSModel.method='var'
-    myTSModel.endog = np.array([0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192])
-    myTSModel.feature = np.array([1.125, 1.25, 1.5, 2, 3, 5, 9, 17, 33, 65, 129, 257, 513, 1025, 2049, 4097, 8193])
-    myTSModel.fit_forecast()
-    print ('1-step ahead forecasted value: {0}'.format(myTSModel.result['forecast']))
-
-#    print ('## test AR with real data ##')
-#    myTSModel.method='ar'
-#    df = load_data('MemePhr', os.path.join(os.path.dirname(__file__),os.path.pardir,'data','ksc','MemePhr.txt'))
-#    myTSModel.endog = np.array(df['Val'][0], dtype=float)
+#    print ('## test VAR with trivious data ##')
+#    myTSModel.method='var'
+#    myTSModel.endog = np.array([0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192])
+#    myTSModel.feature = np.array([1.125, 1.25, 1.5, 2, 3, 5, 9, 17, 33, 65, 129, 257, 513, 1025, 2049, 4097, 8193])
 #    myTSModel.fit_forecast()
 #    print ('1-step ahead forecasted value: {0}'.format(myTSModel.result['forecast']))
-
+#
+    print ('## test ARIMA with trivious data ##')
+    myTSModel.method = 'arima'
+    myTSModel.endog = np.array([0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192])
+    myTSModel.fit_forecast()
+    print ('1-step ahead forecasted value: {0}'.format(myTSModel.result['forecast']))

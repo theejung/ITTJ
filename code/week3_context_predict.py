@@ -53,7 +53,11 @@ class TimeSerisLSTM():
         # load time series
         ts_loader = TimeSeriesDataLoader(
             data_path = '../data',
+<<<<<<< HEAD
             filename = 'daily_price_5comp.csv', #'stock_vol_all.csv',
+=======
+            filename = 'daily_price_5comp.csv',#'stock_vol_all.csv',
+>>>>>>> ced4264452d5c76a3cb19b87b5e84dc1f7a0fa94
             feature = [self.timeseries_type],
             ticker = self.companies,
             start_date = self.start_date,
@@ -134,8 +138,8 @@ class TimeSerisLSTM():
         #self.model.add(Activation("linear"))
 
         start = time.time()
-        self.model.compile(loss="mse", optimizer="rmsprop",
-            lr=self.learning_rate)
+        self.model.compile(loss="mse", optimizer="rmsprop")
+            #,lr=self.learning_rate)
         print("Compilation Time: ", time.time() - start)
 
 
@@ -180,6 +184,13 @@ class TimeSerisLSTM():
 #TODO (1) model save/restore, (2) train/test loading structure efficiently, (3) RMSE calculation (4) visualziation
 #TODO (5) add stock price, (6) Apple -> 10 companies, more periods, (7) Task - 3. (random word vector).
 
+
+import tensorflow as tf
+from keras.backend.tensorflow_backend import set_session
+tf_config = tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)
+tf_config.gpu_options.allow_growth = True
+set_session(tf.Session(config=tf_config))
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--layers", default=[200,200])
@@ -188,8 +199,13 @@ if __name__ == '__main__':
     parser.add_argument("--learning_rate", default = 0.5) #0.5 for price 0.001 for volatil
 
 
+<<<<<<< HEAD
     parser.add_argument("--epoch", default=300)
     parser.add_argument("--batch_size", default= 5)
+=======
+    parser.add_argument("--epoch", default=200)
+    parser.add_argument("--batch_size", default= 32) #5
+>>>>>>> ced4264452d5c76a3cb19b87b5e84dc1f7a0fa94
 
     parser.add_argument("--norm", action='store_true', default=False)
 
