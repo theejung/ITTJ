@@ -9,7 +9,7 @@ from utils import lowerr
 
 
 class ContextDataLoader():
-
+https://github.com/oscarg933/ITTJ/tree/https/github.com/oscarg933/jquery-ui-touch-punch/tree/%2523tabs
     def __init__(self, data_path, ticker="AAPL", start_date="1990-01-01", end_date="2010-12-31", seq_len = 12, step = 1, normalize = False):
         self.data_path = data_path
         self.ticker = ticker
